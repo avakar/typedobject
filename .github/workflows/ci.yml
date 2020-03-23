@@ -1,0 +1,41 @@
+name: Continuous Integration
+on: push
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - run: python setup.py install
+    - run: |
+        pip install pytest
+        pytest
+
+  release:
+    if: github.ref == 'refs/heads/master'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: avakar/derive-version@85d631f1a12b084b2592d1160b3c9154ceea7ea8
+      id: version
+    - uses: avakar/tag-and-release@8f4b627f03fe59381267d3925d39191e27f44236
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: avakar/create-deployment@0e50b8e4c41148348b4a3ccc2658fa01969cc36d
+      with:
+        environment: PyPI
+        task: release:pypi
+        production_environment: true
+        payload: '{ "version": "${{ steps.version.outputs.version }}" }'
+        required_contexts: ''
+      env:
+        GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
