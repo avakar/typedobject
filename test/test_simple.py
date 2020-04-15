@@ -1,5 +1,5 @@
 import pytest
-from typedobject import TypedObject
+from typedobject import typedobject
 
 def _test_slotted(x):
     assert not hasattr(x, '__dict__')
@@ -8,14 +8,18 @@ def _test_slotted(x):
         x.non_existent = 1
 
 def test_empty():
-    class X(TypedObject):
+    @typedobject
+    class X:
         pass
 
     x = X()
     _test_slotted(x)
 
+    assert repr(x) == 'X()'
+
 def test_one_field():
-    class X(TypedObject):
+    @typedobject
+    class X:
         a: int
 
     with pytest.raises(TypeError):
@@ -32,8 +36,11 @@ def test_one_field():
     x.a = 4
     assert x.a == 4
 
+    assert repr(x) == 'X(a=4)'
+
 def test_one_field_with_default():
-    class X(TypedObject):
+    @typedobject
+    class X:
         a: int = 10
 
     x = X()
@@ -52,7 +59,8 @@ def test_one_field_with_default():
     assert x.a == 4
 
 def test_two_fields():
-    class X(TypedObject):
+    @typedobject
+    class X:
         a: int
         b: int
 
@@ -77,7 +85,8 @@ def test_two_fields():
     assert x.b == 5
 
 def test_trailing_defaults():
-    class X(TypedObject):
+    @typedobject
+    class X:
         a: int
         b: int = 50
 
@@ -96,30 +105,13 @@ def test_trailing_defaults():
     assert x.a == 4
     assert x.b == 5
 
-def test_leading_defaults():
-    class X(TypedObject):
-        a: int = 51
-        b: int
-
-    with pytest.raises(TypeError):
-        x = X()
-
-    with pytest.raises(TypeError):
-        x = X(1, 2)
-
-    x = X(a=3, b=4)
-    assert x.a == 3
-    assert x.b == 4
-
-    x = X(b=5)
-    assert x.a == 51
-    assert x.b == 5
-
 def test_inheritance():
-    class X(TypedObject):
+    @typedobject
+    class X:
         a: int
         b: int
 
+    @typedobject
     class Y(X):
         c: int
 

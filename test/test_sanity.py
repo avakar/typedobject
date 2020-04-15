@@ -1,15 +1,16 @@
 import pytest
-from typedobject import TypedObject
+from typedobject import typedobject
 
 
 def test_no_dunder():
     with pytest.raises(TypeError):
-        # pylint: disable=unused-variable
-        class X(TypedObject):
+        @typedobject
+        class _X:
             __hello__: int
 
 def test_superprivate():
-    class X(TypedObject):
+    @typedobject
+    class X:
         __hello: int
 
         def foo(self):

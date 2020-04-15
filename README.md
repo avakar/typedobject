@@ -1,6 +1,7 @@
 # typedobject
 
-Define real, inheritable, and efficient Python classes using `TypedDict`-like syntax.
+Define real, inheritable, and efficient Python classes using `TypedDict`-like
+syntax.
 
 ## Getting started
 
@@ -8,12 +9,13 @@ Install from pip.
 
     python -m pip install typedobject
 
-Then, inherit your class from `TypedObject` and declare its member fields
+Then, annotate your class with `typedobject` and declare its member fields
 using variable annotations.
 
-    from typedobject import TypedObject
+    from typedobject import typedobject
 
-    class Point(TypedObject):
+    @typedobject
+    class Point:
         x: int
         y: int
 
@@ -25,7 +27,8 @@ Then construct the object using either positional or keyword arguments.
 
 You can define methods, including `__init__`.
 
-    class Rectangle(TypedObject):
+    @typedobject
+    class Rectangle:
         pt1: Point
         pt2: Point
 
@@ -47,19 +50,24 @@ not `dict`s.
 
 Inheritance works just fine.
 
+    @typedobject
     class RoundedRect(Rectangle):
         corner_radius: int
 
     rr = RoundedRect(Point(1, 1), Point(3, 3), 1)
 
-Note that the derived class always overrides `__init__`.
+Note that the derived class overrides `__init__`, unless you use `.no_init`.
 
-Typed object classes specify `__slots__`, which makes access to attributes
-faster and makes objects take less memory, but prevents adding new fields
-dynamically.
+    @typedobject.no_init
+    class RoundedRect2(Rectangle):
+        corner_radius: int
 
-    # raises AttributeError
-    rect.width = 2
+    rr = RoundedRect2(1, 1, 3, 3)
+    assert not hasattr(rr, 'corner_radius')
+
+Typed object classes, unlike `dataclass`, specify `__slots__`, which makes
+access to attributes faster and makes objects take less memory, but prevents
+adding new fields dynamically.
 
 They also prevent multiple inheritance.
 
@@ -73,6 +81,7 @@ You can, however, inject mixins.
         def area(self):
             return self.width() * self.height()
 
-    class Rectangle2(TypedObject, TwoDObjectMixin):
+    @typedobject
+    class Rectangle2(TwoDObjectMixin):
         pt1: Point
         pt2: Point

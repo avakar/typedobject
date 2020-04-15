@@ -1,7 +1,8 @@
 import pytest
-from typedobject import TypedObject
+from typedobject import typedobject
 
-class X(TypedObject):
+@typedobject
+class X:
     a: int = 42
     b: int
 
@@ -14,6 +15,7 @@ def test_custom_init():
     assert x.a == 42
     assert x.b == 1
 
+@typedobject
 class Y(X):
     c: int
 
@@ -25,4 +27,3 @@ def test_derived_init():
     assert x.a == 42
     assert x.b == 3
     assert x.c == 4
-
