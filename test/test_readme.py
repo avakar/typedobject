@@ -2,10 +2,12 @@ import pytest
 
 def test_readme():
     # pylint: disable=unused-variable
+    # pylint: disable=no-value-for-parameter
 
-    from typedobject import TypedObject
+    from typedobject import typedobject
 
-    class Point(TypedObject):
+    @typedobject
+    class Point:
         x: int
         y: int
 
@@ -13,7 +15,8 @@ def test_readme():
     pt2 = Point(x=10, y=20)
     assert pt1 == pt2
 
-    class Rectangle(TypedObject):
+    @typedobject
+    class Rectangle:
         pt1: Point
         pt2: Point
 
@@ -30,13 +33,18 @@ def test_readme():
     assert isinstance(rect, Rectangle)
     assert not isinstance(rect, Point)
 
+    @typedobject
     class RoundedRect(Rectangle):
         corner_radius: int
 
     rr = RoundedRect(Point(1, 1), Point(3, 3), 1)
 
-    with pytest.raises(AttributeError):
-        rect.width = 2
+    @typedobject.no_init
+    class RoundedRect2(Rectangle):
+        corner_radius: int
+
+    rr = RoundedRect2(1, 1, 3, 3)
+    assert not hasattr(rr, 'corner_radius')
 
     with pytest.raises(TypeError):
         class RectangleWithAPoint(Rectangle, Point):
@@ -46,6 +54,7 @@ def test_readme():
         def area(self):
             return self.width() * self.height()
 
-    class Rectangle2(TypedObject, TwoDObjectMixin):
+    @typedobject
+    class Rectangle2(TwoDObjectMixin):
         pt1: Point
         pt2: Point
